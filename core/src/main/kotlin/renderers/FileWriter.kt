@@ -1,6 +1,5 @@
 package org.jetbrains.dokka.renderers
 
-import com.intellij.util.io.isDirectory
 import java.io.File
 import java.io.IOException
 import java.net.URI
@@ -51,7 +50,7 @@ class FileWriter(val root: String, override val extension: String) : OutputWrite
         val fs = getFileSystemForURI(uri)
         val path = fs.getPath(pathFrom)
         for (file in Files.walk(path).iterator()) {
-            if (file.isDirectory()) {
+            if (Files.isDirectory(file)) {
                 val dirPath = file.toAbsolutePath().toString()
                 Paths.get(root, rebase(dirPath)).toFile().mkdirsOrFail()
             } else {

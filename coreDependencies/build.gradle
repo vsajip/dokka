@@ -1,6 +1,3 @@
-repositories {
-    ivy(ivyrepo)
-}
 
 configurations {
     kotlin_plugin_full
