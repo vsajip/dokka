@@ -3,7 +3,10 @@ package org.jetbrains.dokka.base
 import org.jetbrains.dokka.CoreExtensions
 import org.jetbrains.dokka.base.renderers.FileWriter
 import org.jetbrains.dokka.base.renderers.OutputWriter
+import org.jetbrains.dokka.base.renderers.gfm.GfmRenderer
+import org.jetbrains.dokka.base.renderers.gfm.MarkdownLocationProviderFactory
 import org.jetbrains.dokka.base.renderers.html.HtmlRenderer
+import org.jetbrains.dokka.base.renderers.jekyll.JekyllRenderer
 import org.jetbrains.dokka.base.resolvers.DefaultLocationProviderFactory
 import org.jetbrains.dokka.base.resolvers.LocationProviderFactory
 import org.jetbrains.dokka.base.signatures.KotlinSignatureProvider
@@ -75,6 +78,22 @@ class DokkaBase : DokkaPlugin() {
 
     val htmlRenderer by extending {
         CoreExtensions.renderer providing ::HtmlRenderer applyIf { format == "html" }
+    }
+
+    val gfmRenderer by extending {
+        CoreExtensions.renderer providing ::GfmRenderer applyIf { format == "gfm" }
+    }
+
+    val gfmLocationProvider by extending {
+        locationProviderFactory providing { MarkdownLocationProviderFactory(it) } order {
+            before(gfmRenderer)
+        } applyIf { format == "gfm" }
+    }
+
+    val jekyllRenderer by extending {
+        CoreExtensions.renderer providing ::JekyllRenderer applyIf {
+            format == "jekyll"
+        }
     }
 
     val locationProvider by extending(isFallback = true) {

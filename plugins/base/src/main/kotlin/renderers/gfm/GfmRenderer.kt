@@ -1,29 +1,15 @@
-package org.jetbrains.dokka.jekyll
+package org.jetbrains.dokka.base.renderers.gfm
 
-import org.jetbrains.dokka.CoreExtensions
+import org.jetbrains.dokka.base.renderers.DefaultRenderer
+import org.jetbrains.dokka.base.resolvers.DefaultLocationProvider
+import org.jetbrains.dokka.base.resolvers.LocationProviderFactory
 import org.jetbrains.dokka.pages.*
 import org.jetbrains.dokka.plugability.DokkaContext
-import org.jetbrains.dokka.plugability.DokkaPlugin
-import org.jetbrains.dokka.plugability.single
-import org.jetbrains.dokka.renderers.DefaultRenderer
-import org.jetbrains.dokka.renderers.OutputWriter
-import org.jetbrains.dokka.resolvers.DefaultLocationProvider
-import org.jetbrains.dokka.resolvers.LocationProvider
-import org.jetbrains.dokka.resolvers.LocationProviderFactory
 import java.lang.StringBuilder
 
 
-class JekyllPlugin : DokkaPlugin() {
+open class GfmRenderer(context: DokkaContext) : DefaultRenderer<StringBuilder>(context) {
 
-    val renderer by extending {
-        CoreExtensions.renderer providing { JekyllRenderer(it.single(CoreExtensions.outputWriter), it) }
-    }
-}
-
-class JekyllRenderer(
-    outputWriter: OutputWriter,
-    context: DokkaContext
-) : DefaultRenderer<StringBuilder>(outputWriter, context) {
     override fun StringBuilder.buildHeader(level: Int, content: StringBuilder.() -> Unit) {
         buildParagraph()
         append("${"#".repeat(level)} ")
@@ -81,9 +67,9 @@ class JekyllRenderer(
 
     override fun StringBuilder.buildTable(node: ContentTable, pageContext: ContentPage) {
 
-        buildParagraph()
-
         val size = node.children.firstOrNull()?.children?.size ?: 0
+
+        buildParagraph()
 
         if(node.header.size > 0) {
             node.header.forEach {
@@ -113,10 +99,14 @@ class JekyllRenderer(
         buildParagraph()
     }
 
+    private fun String.escapeIllegalCharacters() = this
+        .replace("<", "\\<")
+        .replace(">", "\\>")
+
     override fun StringBuilder.buildText(textNode: ContentText) {
         val decorators = decorators(textNode.style)
         this.append(decorators)
-        this.append(textNode.text.replace(Regex("[<>]"), ""))
+        this.append(textNode.text.escapeIllegalCharacters())
         this.append(decorators.reversed())
     }
 
@@ -131,9 +121,6 @@ class JekyllRenderer(
 
     override fun buildPage(page: ContentPage, content: (StringBuilder, ContentPage) -> Unit): String {
         val builder = StringBuilder()
-        builder.append("---\n")
-        builder.append("title: ${page.name} -\n")
-        builder.append("---\n")
         content(builder, page)
         return builder.toString()
     }
@@ -161,7 +148,7 @@ class JekyllRenderer(
 
     private fun StringBuilder.buildLink(to: PageNode, from: PageNode) =
         buildLink(locationProvider.resolve(to, from)) {
-            append(to.name)
+            append(to.name.escapeIllegalCharacters())
         }
 
     override fun renderPage(page: PageNode) {
@@ -179,4 +166,20 @@ class JekyllRenderer(
             )
         }
     }
+}
+
+class MarkdownLocationProviderFactory(val context: DokkaContext) : LocationProviderFactory {
+
+    override fun getLocationProvider(pageNode: RootPageNode) = MarkdownLocationProvider(pageNode, context)
+}
+
+
+class MarkdownLocationProvider(
+    pageGraphRoot: RootPageNode,
+    dokkaContext: DokkaContext
+) : DefaultLocationProvider(
+    pageGraphRoot,
+    dokkaContext
+) {
+    override val extension = ".md"
 }
