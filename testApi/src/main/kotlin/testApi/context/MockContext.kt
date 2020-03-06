@@ -6,6 +6,7 @@ import org.jetbrains.dokka.pages.PlatformData
 import org.jetbrains.dokka.plugability.DokkaContext
 import org.jetbrains.dokka.plugability.DokkaPlugin
 import org.jetbrains.dokka.plugability.ExtensionPoint
+import org.jetbrains.dokka.plugability.UnresolvedTypeHandler
 import org.jetbrains.dokka.utilities.DokkaConsoleLogger
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
@@ -17,6 +18,7 @@ class MockContext(
     private val testConfiguration: DokkaConfiguration? = null,
     private val testPlatforms: Map<PlatformData, EnvironmentAndFacade>? = null,
     private val unusedExtensionPoints: List<ExtensionPoint<*>>? = null
+    override val unresolvedTypeHandler: UnresolvedTypeHandler = UnresolvedTypeHandler.Exception
 ) : DokkaContext {
     private val extensionMap by lazy {
         extensions.groupBy(Pair<ExtensionPoint<*>, (DokkaContext) -> Any>::first) {

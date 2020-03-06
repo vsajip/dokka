@@ -5,6 +5,7 @@ import org.jetbrains.dokka.DokkaGenerator
 import org.jetbrains.dokka.EnvironmentAndFacade
 import org.jetbrains.dokka.pages.PlatformData
 import org.jetbrains.dokka.plugability.DokkaPlugin
+import org.jetbrains.dokka.plugability.UnresolvedTypeHandler
 import org.jetbrains.dokka.utilities.DokkaLogger
 
 internal class DokkaTestGenerator(
@@ -20,7 +21,12 @@ internal class DokkaTestGenerator(
         val platforms: Map<PlatformData, EnvironmentAndFacade> = dokkaGenerator.setUpAnalysis(configuration)
         analysisSetupStage(platforms)
 
-        val context = dokkaGenerator.initializePlugins(configuration, logger, platforms, pluginOverrides)
+        val context = dokkaGenerator.initializePlugins(
+            configuration,
+            logger,
+            platforms,
+            pluginOverrides
+        )
         pluginsSetupStage(context)
 
         val modulesFromPlatforms = dokkaGenerator.createDocumentationModels(platforms, context)

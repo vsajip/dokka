@@ -1,9 +1,12 @@
 package org.jetbrains.dokka.plugability
 
 import org.jetbrains.dokka.DokkaConfiguration
+import org.jetbrains.dokka.utilities.DokkaLogger
 import org.jetbrains.dokka.EnvironmentAndFacade
 import org.jetbrains.dokka.pages.PlatformData
-import org.jetbrains.dokka.utilities.DokkaLogger
+import org.jetbrains.kotlin.idea.refactoring.fqName.fqName
+import org.jetbrains.kotlin.types.KotlinType
+import org.jetbrains.kotlin.types.isError
 import java.io.File
 import java.net.URLClassLoader
 import java.util.*
@@ -22,8 +25,8 @@ interface DokkaContext {
     val logger: DokkaLogger
     val configuration: DokkaConfiguration
     val platforms: Map<PlatformData, EnvironmentAndFacade>
+    val unresolvedTypeHandler: UnresolvedTypeHandler
     val unusedPoints: Collection<ExtensionPoint<*>>
-
 
     companion object {
         fun create(
@@ -32,7 +35,7 @@ interface DokkaContext {
             platforms: Map<PlatformData, EnvironmentAndFacade>,
             pluginOverrides: List<DokkaPlugin>
         ): DokkaContext =
-            DokkaContextConfigurationImpl(logger, configuration, platforms).apply {
+            DokkaContextConfigurationImpl(logger, configuration, platforms, configuration.unresolvedTypeHandler).apply {
                 configuration.pluginsClasspath.map { it.relativeTo(File(".").absoluteFile).toURI().toURL() }
                     .toTypedArray()
                     .let { URLClassLoader(it, this.javaClass.classLoader) }
@@ -45,6 +48,30 @@ interface DokkaContext {
     }
 }
 
+enum class UnresolvedTypeHandler(val response: (KotlinType?) -> String? = { it?.fqName?.asString() }) {
+    Exception({ type ->
+        if (type?.isError != false)
+            throw IllegalStateException("Unresolved type: $type")
+        else type.fqName?.asString()
+    }),
+    Skip({ type ->
+        if (type?.isError != false)
+            null
+        else type.fqName?.asString()
+    }),
+    Approximate({ type ->
+        //        type?.fqName?.asString() // todo
+        if (type?.isError != false) when (val t = type) {
+            is org.jetbrains.kotlin.types.UnresolvedType -> t.presentableName
+            is org.jetbrains.kotlin.types.DeferredType -> "Error type"
+            else ->
+                org.jetbrains.dokka.utilities.DokkaConsoleLogger.info(t.toString()).let { null }
+        } else type.fqName?.asString()
+    });
+
+    operator fun invoke(type: KotlinType?) = response(type)
+}
+
 inline fun <reified T : DokkaPlugin> DokkaContext.plugin(): T = plugin(T::class)
     ?: throw java.lang.IllegalStateException("Plugin ${T::class.qualifiedName} is not present in context.")
 
@@ -55,7 +82,8 @@ interface DokkaContextConfiguration {
 private class DokkaContextConfigurationImpl(
     override val logger: DokkaLogger,
     override val configuration: DokkaConfiguration,
-    override val platforms: Map<PlatformData, EnvironmentAndFacade>
+    override val platforms: Map<PlatformData, EnvironmentAndFacade>,
+    override val unresolvedTypeHandler: UnresolvedTypeHandler = UnresolvedTypeHandler.Exception
 ) : DokkaContext, DokkaContextConfiguration {
     private val plugins = mutableMapOf<KClass<*>, DokkaPlugin>()
     private val pluginStubs = mutableMapOf<KClass<*>, DokkaPlugin>()

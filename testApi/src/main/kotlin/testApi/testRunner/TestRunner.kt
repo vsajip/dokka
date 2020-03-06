@@ -7,6 +7,7 @@ import org.jetbrains.dokka.pages.PlatformData
 import org.jetbrains.dokka.pages.RootPageNode
 import org.jetbrains.dokka.plugability.DokkaContext
 import org.jetbrains.dokka.plugability.DokkaPlugin
+import org.jetbrains.dokka.plugability.UnresolvedTypeHandler
 import org.jetbrains.dokka.utilities.DokkaConsoleLogger
 import org.junit.rules.TemporaryFolder
 import java.io.File
@@ -137,6 +138,7 @@ abstract class AbstractCoreTest {
         var cacheRoot: String? = null
         var pluginsClasspath: List<File> = emptyList()
         private val passesConfigurations = mutableListOf<PassConfigurationImpl>()
+        var unresolvedTypeHandler: UnresolvedTypeHandler = UnresolvedTypeHandler.Exception
 
         fun build() = DokkaConfigurationImpl(
             outputDir = outputDir,
@@ -145,7 +147,8 @@ abstract class AbstractCoreTest {
             cacheRoot = cacheRoot,
             impliedPlatforms = emptyList(),
             passesConfigurations = passesConfigurations,
-            pluginsClasspath = pluginsClasspath
+            pluginsClasspath = pluginsClasspath,
+            unresolvedTypeHandler = unresolvedTypeHandler
         )
 
         fun passes(block: Passes.() -> Unit) {

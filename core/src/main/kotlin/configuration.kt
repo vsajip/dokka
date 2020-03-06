@@ -1,5 +1,6 @@
 package org.jetbrains.dokka
 
+import org.jetbrains.dokka.plugability.UnresolvedTypeHandler
 import java.io.File
 import java.net.URL
 
@@ -32,6 +33,7 @@ interface DokkaConfiguration {
     val passesConfigurations: List<PassConfiguration>
     val impliedPlatforms: List<String>
     var pluginsClasspath: List<File>
+    val unresolvedTypeHandler: UnresolvedTypeHandler
 
     interface PassConfiguration {
         val moduleName: String

@@ -303,7 +303,8 @@ data class DParameter(
     override val documentation: PlatformDependent<DocumentationNode>,
     val type: Bound,
     override val platformData: List<PlatformData>,
-    override val extra: PropertyContainer<DParameter> = PropertyContainer.empty()
+    override val extra: PropertyContainer<DParameter> = PropertyContainer.empty(),
+    val sources: DocumentableSource? = null
 ) : Documentable(), WithExtraProperties<DParameter> {
     override val children: List<Nothing>
         get() = emptyList()

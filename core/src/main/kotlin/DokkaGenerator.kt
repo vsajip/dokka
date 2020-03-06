@@ -10,6 +10,7 @@ import org.jetbrains.dokka.pages.PlatformData
 import org.jetbrains.dokka.pages.RootPageNode
 import org.jetbrains.dokka.plugability.DokkaContext
 import org.jetbrains.dokka.plugability.DokkaPlugin
+import org.jetbrains.dokka.plugability.UnresolvedTypeHandler
 import org.jetbrains.dokka.utilities.DokkaLogger
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocation
@@ -34,7 +35,11 @@ class DokkaGenerator(
         val platforms: Map<PlatformData, EnvironmentAndFacade> = setUpAnalysis(configuration)
 
         report("Initializing plugins")
-        val context = initializePlugins(configuration, logger, platforms)
+        val context = initializePlugins(
+            configuration,
+            logger,
+            platforms
+        )
 
         report("Creating documentation models")
         val modulesFromPlatforms = createDocumentationModels(platforms, context)

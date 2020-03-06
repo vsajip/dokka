@@ -8,6 +8,7 @@ import org.gradle.util.ConfigureUtil
 import org.jetbrains.dokka.DokkaConfiguration
 import org.jetbrains.dokka.DokkaConfiguration.*
 import org.jetbrains.dokka.Platform
+import org.jetbrains.dokka.plugability.UnresolvedTypeHandler
 import java.io.File
 import java.io.Serializable
 import java.net.URL
@@ -125,6 +126,7 @@ class GradleDokkaConfigurationImpl: DokkaConfiguration {
     override var impliedPlatforms: List<String> = emptyList()
     override var passesConfigurations: List<GradlePassConfigurationImpl> = emptyList()
     override var pluginsClasspath: List<File> = emptyList()
+    override val unresolvedTypeHandler: UnresolvedTypeHandler = UnresolvedTypeHandler.Exception
 }
 
 class GradlePackageOptionsImpl: PackageOptions, Serializable {
