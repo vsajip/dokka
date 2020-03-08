@@ -18,6 +18,8 @@ import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.Visibility
 import org.jetbrains.kotlin.descriptors.impl.DeclarationDescriptorVisitorEmptyBodies
+import org.jetbrains.kotlin.idea.kdoc.findKDoc
+import org.jetbrains.kotlin.library.metadata.KlibMetadataProtoBuf.fqName
 import org.jetbrains.kotlin.resolve.DescriptorUtils
 import org.jetbrains.kotlin.resolve.calls.components.isVararg
 import org.jetbrains.kotlin.resolve.calls.tasks.isDynamic
@@ -29,9 +31,6 @@ import org.jetbrains.kotlin.resolve.scopes.DescriptorKindFilter
 import org.jetbrains.kotlin.resolve.scopes.MemberScope
 import org.jetbrains.kotlin.types.KotlinType
 import org.jetbrains.kotlin.types.TypeProjection
-import org.jetbrains.dokka.model.Variance
-import org.jetbrains.kotlin.library.metadata.KlibMetadataProtoBuf.fqName
-import org.jetbrains.kotlin.idea.kdoc.findKDoc
 
 class DefaultDescriptorToDocumentableTranslator(
     private val context: DokkaContext
@@ -78,6 +77,7 @@ private class DokkaDescriptorVisitor(
             functions = scope.functions(driWithPlatform),
             properties = scope.properties(driWithPlatform),
             classlikes = scope.classlikes(driWithPlatform),
+            typealiases = scope.typealiases(driWithPlatform),
             documentation = descriptor.resolveDescriptorData(platformData),
             platformData = listOf(platformData)
         )
@@ -342,6 +342,16 @@ private class DokkaDescriptorVisitor(
         )
     }
 
+    override fun visitTypeAliasDescriptor(descriptor: TypeAliasDescriptor, parent: DRIWithPlatformInfo?) =
+        TypeAlias(
+            dri = DRI.from(descriptor),
+            name = descriptor.name.asString(),
+            type = descriptor.defaultType.toBound(),
+            underlyingType = descriptor.underlyingType.toBound(),
+            documentation = descriptor.resolveDescriptorData(platformData),
+            platformData = listOf(platformData)
+        )
+
     private fun parameter(index: Int, descriptor: ValueParameterDescriptor, parent: DRIWithPlatformInfo) =
         Parameter(
             dri = parent.dri.copy(target = index + 1),
@@ -372,6 +382,11 @@ private class DokkaDescriptorVisitor(
         getContributedDescriptors(DescriptorKindFilter.PACKAGES) { true }
             .filterIsInstance<PackageFragmentDescriptor>()
             .map { visitPackageFragmentDescriptor(it, parent) }
+
+    private fun MemberScope.typealiases(parent: DRIWithPlatformInfo): List<TypeAlias> =
+        getContributedDescriptors(DescriptorKindFilter.TYPE_ALIASES) { true }
+            .filterIsInstance<TypeAliasDescriptor>()
+            .map { visitTypeAliasDescriptor(it, parent) }
 
     private fun MemberScope.enumEntries(parent: DRIWithPlatformInfo): List<EnumEntry> =
         this.getContributedDescriptors(DescriptorKindFilter.CLASSIFIERS) { true }

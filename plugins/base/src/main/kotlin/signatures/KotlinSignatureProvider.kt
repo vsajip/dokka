@@ -25,6 +25,7 @@ class KotlinSignatureProvider(ctcc: CommentsToContentConverter, logger: DokkaLog
         is Property -> signature(documentable)
         is Classlike -> signature(documentable)
         is TypeParameter -> signature(documentable)
+        is TypeAlias -> signature(documentable)
         else -> throw NotImplementedError(
             "Cannot generate signature for ${documentable::class.qualifiedName} ${documentable.name}"
         )
@@ -80,6 +81,13 @@ class KotlinSignatureProvider(ctcc: CommentsToContentConverter, logger: DokkaLog
             text(": ")
             signatureForProjection(returnType)
         }
+    }
+
+    private fun signature(t: TypeAlias) = contentBuilder.contentFor(t, ContentKind.Symbol, setOf(TextStyle.Monospace)) {
+        text("typealias ")
+        signatureForProjection(t.type)
+        text(" = ")
+        signatureForProjection(t.underlyingType)
     }
 
     private fun signature(t: TypeParameter) = contentBuilder.contentFor(t) {
