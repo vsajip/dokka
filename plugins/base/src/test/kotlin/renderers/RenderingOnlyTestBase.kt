@@ -1,6 +1,8 @@
 package renderers
 
 import org.jetbrains.dokka.base.DokkaBase
+import org.jetbrains.dokka.base.resolvers.external.DokkaExternalLocationProviderFactory
+import org.jetbrains.dokka.base.resolvers.external.JavadocExternalLocationProviderFactory
 import org.jetbrains.dokka.base.resolvers.local.DefaultLocationProviderFactory
 import org.jetbrains.dokka.base.resolvers.local.LocationProvider
 import org.jetbrains.dokka.base.resolvers.local.LocationProviderFactory
@@ -20,7 +22,9 @@ abstract class RenderingOnlyTestBase {
     val files = TestOutputWriter()
     val context = MockContext(
         DokkaBase().outputWriter to { _ -> files },
-        DokkaBase().locationProviderFactory to ::DefaultLocationProviderFactory
+        DokkaBase().locationProviderFactory to ::DefaultLocationProviderFactory,
+        DokkaBase().externalLocationProviderFactory to { _ -> ::JavadocExternalLocationProviderFactory },
+        DokkaBase().externalLocationProviderFactory to { _ -> ::DokkaExternalLocationProviderFactory }
     )
 
     protected fun linesAfterContentTag() =
