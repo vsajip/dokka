@@ -37,6 +37,11 @@ data class PlatformDependent<out T>(
         yieldAll(map.values)
     }
 
+    fun filtered(platformDataList: List<PlatformData>) = PlatformDependent(
+        map.filter { it.key in platformDataList },
+        expect
+    )
+
     companion object {
         fun <T> empty(): PlatformDependent<T> = PlatformDependent(emptyMap())
         fun <T> from(platformData: PlatformData, element: T) = PlatformDependent(mapOf(platformData to element))
@@ -321,6 +326,22 @@ data class TypeParameter(
 ) : Documentable(), WithExtraProperties<TypeParameter> {
     override val children: List<Nothing>
         get() = emptyList()
+
+    fun filter(filteredData: List<PlatformData>) =
+        if (filteredData.containsAll(platformData)) this
+        else {
+            val intersection = filteredData.intersect(platformData).toList()
+            if (intersection.isEmpty()) null
+            else TypeParameter(
+                dri,
+                name,
+                documentation.filtered(intersection),
+                bounds,
+                intersection,
+                extra
+            )
+        }
+
 
     override fun withNewExtras(newExtras: PropertyContainer<TypeParameter>) = copy(extra = newExtras)
 }
