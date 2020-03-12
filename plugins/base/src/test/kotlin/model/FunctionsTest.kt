@@ -4,8 +4,11 @@ import org.jetbrains.dokka.model.DFunction
 import org.jetbrains.dokka.model.DPackage
 import org.jetbrains.dokka.plugability.UnresolvedTypeHandler
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import utils.AbstractModelTest
-import utils.*
+import utils.assertNotNull
+import utils.comments
+import utils.name
 
 class FunctionTest : AbstractModelTest("/src/main/kotlin/function/Test.kt", "function") {
 
@@ -21,7 +24,7 @@ class FunctionTest : AbstractModelTest("/src/main/kotlin/function/Test.kt", "fun
         ) {
             with((this / "function" / "fn").cast<DFunction>()) {
                 name equals "fn"
-                type.name equals "Unit"
+                type.name equals "kotlin.Unit"
                 this.children.assertCount(0, "Function children: ")
             }
         }
@@ -39,29 +42,31 @@ class FunctionTest : AbstractModelTest("/src/main/kotlin/function/Test.kt", "fun
         """,
             typeHandler = UnresolvedTypeHandler.Approximate
         ) {
-            with((this / "function").cast<Package>()) {
-                with((this / "fn1").cast<Function>()) {
-                    type.constructorFqName equals "NoType"
+            with((this / "function").cast<DPackage>()) {
+                with((this / "fn1").cast<DFunction>()) {
+                    type.name equals "NoType"
                 }
-                with((this / "fn2").cast<Function>()) {
-                    type.constructorFqName equals "Error type"
+                with((this / "fn2").cast<DFunction>()) {
+                    type.name equals "Error type"
                 }
             }
         }
     }
 
-    @Test(expected = IllegalStateException::class)
+    @Test
     fun exceptionUnresolvedTypeHandler() {
-        inlineModelTest(
-            """
+        assertThrows<java.lang.IllegalStateException> {
+            inlineModelTest(
+                """
             |/**
             | * Function fn
             | */
             |fun fn1(): NoType
             |fun fn2() = emptyList()
         """,
-            typeHandler = UnresolvedTypeHandler.Exception
-        ) {
+                typeHandler = UnresolvedTypeHandler.Exception
+            ) {
+            }
         }
     }
 
@@ -78,10 +83,10 @@ class FunctionTest : AbstractModelTest("/src/main/kotlin/function/Test.kt", "fun
         """,
             typeHandler = UnresolvedTypeHandler.Skip
         ) {
-            with((this / "function").cast<Package>()) {
+            with((this / "function").cast<DPackage>()) {
                 children counts 1
-                with((this / "fn3").cast<Function>()) {
-                    type.constructorFqName equals "kotlin.Int"
+                with((this / "fn3").cast<DFunction>()) {
+                    type.name equals "kotlin.Int"
                 }
             }
         }
@@ -117,7 +122,7 @@ class FunctionTest : AbstractModelTest("/src/main/kotlin/function/Test.kt", "fun
                 with(fn2) {
                     name equals "fn"
                     parameters.assertCount(1)
-                    parameters.first().type.name equals "Int"
+                    parameters.first().type.name equals "kotlin.Int"
                 }
             }
         }
@@ -156,7 +161,7 @@ class FunctionTest : AbstractModelTest("/src/main/kotlin/function/Test.kt", "fun
                     name equals "fn"
                     parameters counts 1
                     receiver.assertNotNull("fn(Int) receiver")
-                    parameters.first().type.name equals "Int"
+                    parameters.first().type.name equals "kotlin.Int"
                 }
             }
         }
@@ -183,11 +188,11 @@ class FunctionTest : AbstractModelTest("/src/main/kotlin/function/Test.kt", "fun
                 parameters counts 1
                 parameters.firstOrNull().assertNotNull("Parameter: ").also {
                     it.name equals "x"
-                    it.type.name equals "Int"
+                    it.type.name equals "kotlin.Int"
                     it.comments() equals "parameter"
                 }
 
-                type.assertNotNull("Return type: ").name equals "Unit"
+                type.assertNotNull("Return type: ").name equals "kotlin.Unit"
             }
         }
     }

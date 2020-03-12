@@ -17,7 +17,7 @@ class MockContext(
     vararg extensions: Pair<ExtensionPoint<*>, (DokkaContext) -> Any>,
     private val testConfiguration: DokkaConfiguration? = null,
     private val testPlatforms: Map<PlatformData, EnvironmentAndFacade>? = null,
-    private val unusedExtensionPoints: List<ExtensionPoint<*>>? = null
+    private val unusedExtensionPoints: List<ExtensionPoint<*>>? = null,
     override val unresolvedTypeHandler: UnresolvedTypeHandler = UnresolvedTypeHandler.Exception
 ) : DokkaContext {
     private val extensionMap by lazy {

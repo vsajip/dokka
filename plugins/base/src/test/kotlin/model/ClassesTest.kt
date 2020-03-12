@@ -1,9 +1,9 @@
 package model
 
 import org.jetbrains.dokka.model.*
-import org.jetbrains.dokka.model.DFunction
 import org.jetbrains.dokka.model.KotlinModifier.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import utils.AbstractModelTest
 import utils.assertNotNull
 import utils.name
@@ -55,7 +55,7 @@ class ClassesTest : AbstractModelTest("/src/main/kotlin/classes/Test.kt", "class
                     parameters counts 1
                     with(parameters.firstOrNull().assertNotNull("Constructor parameter")) {
                         name equals "name"
-                        type.name equals "String"
+                        type.name equals "kotlin.String"
                     }
                 }
 
@@ -77,7 +77,7 @@ class ClassesTest : AbstractModelTest("/src/main/kotlin/classes/Test.kt", "class
                 children counts 5
 
                 with((this / "fn").cast<DFunction>()) {
-                    type.name equals "Unit"
+                    type.name equals "kotlin.Unit"
                     parameters counts 0
                     visibility.values allEquals KotlinVisibility.Public
                 }
@@ -133,7 +133,7 @@ class ClassesTest : AbstractModelTest("/src/main/kotlin/classes/Test.kt", "class
                     with((this / "foo").cast<DFunction>()) {
                         name equals "foo"
                         parameters counts 0
-                        type.name equals "Unit"
+                        type.name equals "kotlin.Unit"
                     }
                 }
             }
@@ -289,8 +289,9 @@ class ClassesTest : AbstractModelTest("/src/main/kotlin/classes/Test.kt", "class
         }
     }
 
-    @Test(expected = IllegalStateException::class)
+    @Test
     fun unresolvedType() {
+        assertThrows<IllegalStateException> {
         inlineModelTest(
             """
                 |class C {
@@ -299,6 +300,7 @@ class ClassesTest : AbstractModelTest("/src/main/kotlin/classes/Test.kt", "class
             """.trimIndent()
         )
         {}
+        }
     }
 
 //                // TODO modifiers
@@ -369,7 +371,7 @@ class ClassesTest : AbstractModelTest("/src/main/kotlin/classes/Test.kt", "class
                     parameters counts 1
                     with(parameters.firstOrNull() notNull "Constructor parameter") {
                         name equals "s"
-                        type.name equals "String"
+                        type.name equals "kotlin.String"
                     }
                 }
             }

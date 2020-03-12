@@ -243,7 +243,7 @@ private class DokkaDescriptorVisitor( // TODO: close this class and make it priv
             visibility = PlatformDependent(mapOf(platformData to descriptor.visibility.toDokkaVisibility())),
             documentation = descriptor.resolveDescriptorData(platformData),
             modifier = descriptor.modifier(),
-            type = descriptor.convertType(dri, context),//KotlinTypeWrapper(descriptor.returnType!!),
+            type = descriptor.convertType(dri, context),
             platformData = listOf(platformData),
             extra = PropertyContainer.withAll(descriptor.additionalExtras(), descriptor.getAnnotations())
         )
@@ -268,7 +268,7 @@ private class DokkaDescriptorVisitor( // TODO: close this class and make it priv
             generics = descriptor.typeParameters.map { it.toTypeParameter() },
             documentation = descriptor.resolveDescriptorData(platformData),
             modifier = descriptor.modifier(),
-            type = descriptor.convertType(dri, context),//KotlinTypeWrapper(descriptor.returnType!!),
+            type = descriptor.convertType(dri, context),
             platformData = listOf(platformData),
             extra = PropertyContainer.withAll(descriptor.additionalExtras(), descriptor.getAnnotations())
         )
@@ -290,7 +290,7 @@ private class DokkaDescriptorVisitor( // TODO: close this class and make it priv
             sources = actual,
             visibility = PlatformDependent(mapOf(platformData to descriptor.visibility.toDokkaVisibility())),
             documentation = descriptor.resolveDescriptorData(platformData),
-            type = descriptor.convertType(dri, context),//KotlinTypeWrapper(descriptor.returnType),
+            type = descriptor.convertType(dri, context),
             modifier = descriptor.modifier(),
             generics = descriptor.typeParameters.map { it.toTypeParameter() },
             platformData = listOf(platformData),
@@ -303,10 +303,10 @@ private class DokkaDescriptorVisitor( // TODO: close this class and make it priv
         parent: DRIWithPlatformInfo
     ): DParameter {
         val dri = parent.dri.copy(target = 0)
-        return Parameter(
+        return DParameter(
             dri = dri,
             name = null,
-            type = descriptor.convertType(dri, context),//KotlinTypeWrapper(descriptor.type),
+            type = descriptor.convertType(dri, context),
             documentation = descriptor.resolveDescriptorData(platformData),
             platformData = listOf(platformData),
             sources = DescriptorDocumentableSource(descriptor)
@@ -325,7 +325,7 @@ private class DokkaDescriptorVisitor( // TODO: close this class and make it priv
             DParameter(
                 parent.copy(target = 1),
                 this.name.asString(),
-                type = descriptor.convertType(dri, context),//KotlinTypeWrapper(this.type),
+                type = descriptor.convertType(dri, context),
                 documentation = descriptor.resolveDescriptorData(platformData),
                 platformData = listOf(platformData),
                 extra = PropertyContainer.withAll(descriptor.additionalExtras(), descriptor.getAnnotations()),
@@ -352,7 +352,7 @@ private class DokkaDescriptorVisitor( // TODO: close this class and make it priv
             parameters = parameters,
             visibility = PlatformDependent(mapOf(platformData to descriptor.visibility.toDokkaVisibility())),
             documentation = descriptor.resolveDescriptorData(platformData),
-            type = descriptor.convertType(dri, context),//KotlinTypeWrapper(descriptor.returnType!!),
+            type = descriptor.convertType(dri, context),
             generics = descriptor.typeParameters.map { it.toTypeParameter() },
             modifier = descriptor.modifier(),
             receiver = descriptor.extensionReceiverParameter?.let {
@@ -367,12 +367,12 @@ private class DokkaDescriptorVisitor( // TODO: close this class and make it priv
         )
     }
 
-    private fun parameter(index: Int, descriptor: ValueParameterDescriptor, parent: DRIWithPlatformInfo): Parameter {
+    private fun parameter(index: Int, descriptor: ValueParameterDescriptor, parent: DRIWithPlatformInfo): DParameter {
         val dri = parent.dri.copy(target = index + 1)
         return DParameter(
             dri = dri,
             name = descriptor.name.asString(),
-            type = descriptor.convertType(dri, context),//KotlinTypeWrapper(descriptor.type),
+            type = descriptor.convertType(dri, context),
             documentation = descriptor.resolveDescriptorData(platformData),
             platformData = listOf(platformData),
             sources = DescriptorDocumentableSource(descriptor),
@@ -532,13 +532,13 @@ private class DokkaDescriptorVisitor( // TODO: close this class and make it priv
         )
     }.let(::Annotations)
 
-    fun DeclarationDescriptor.convertType(dri: DRI, context: DokkaContext): TypeWrapper = when (val desc = this) {
+    fun DeclarationDescriptor.convertType(dri: DRI, context: DokkaContext): Bound = when (val desc = this) {
         is ValueParameterDescriptor -> desc.type
         is FunctionDescriptor -> desc.returnType
         is PropertyDescriptor -> desc.returnType
         is ReceiverParameterDescriptor -> desc.type
         else -> null
-    }?.let { context.unresolvedTypeHandler(it) }?.let { KotlinTypeWrapper(constructorFqName = it, dri = dri) }!!
+    }?.let { context.unresolvedTypeHandler(it) }.let { OtherParameter(it ?: "") }
 
     inline fun <reified T: DeclarationDescriptor> Collection<T>.filterTypeError() =
         if (context.unresolvedTypeHandler == UnresolvedTypeHandler.Skip) {

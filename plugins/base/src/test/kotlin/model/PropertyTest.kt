@@ -20,9 +20,9 @@ class PropertyTest : AbstractModelTest("/src/main/kotlin/property/Test.kt", "pro
                 name equals "property"
                 children counts 0
                 with(getter.assertNotNull("Getter")) {
-                    type.name equals "String"
+                    type.name equals "kotlin.String"
                 }
-                 type.name equals "String"
+                 type.name equals "kotlin.String"
             }
         }
     }
@@ -39,9 +39,9 @@ class PropertyTest : AbstractModelTest("/src/main/kotlin/property/Test.kt", "pro
                 children counts 0
                 setter.assertNotNull("Setter")
                 with(getter.assertNotNull("Getter")) {
-                    type.name equals "String"
+                    type.name equals "kotlin.String"
                 }
-                 type.name equals "String"
+                 type.name equals "kotlin.String"
             }
         }
     }
@@ -58,9 +58,9 @@ class PropertyTest : AbstractModelTest("/src/main/kotlin/property/Test.kt", "pro
                 name equals "property"
                 children counts 0
                 with(getter.assertNotNull("Getter")) {
-                    type.name equals "String"
+                    type.name equals "kotlin.String"
                 }
-                 type.name equals "String"
+                 type.name equals "kotlin.String"
             }
         }
     }
@@ -79,7 +79,7 @@ class PropertyTest : AbstractModelTest("/src/main/kotlin/property/Test.kt", "pro
                 children counts 0
                 setter.assertNotNull("Setter")
                 with(getter.assertNotNull("Getter")) {
-                    type.name equals "String"
+                    type.name equals "kotlin.String"
                 }
                 visibility.values allEquals KotlinVisibility.Public
             }
@@ -99,10 +99,10 @@ class PropertyTest : AbstractModelTest("/src/main/kotlin/property/Test.kt", "pro
                 children counts 0
                 with(receiver.assertNotNull("property receiver")) {
                     name equals null
-                    type.name equals "String"
+                    type.name equals "kotlin.String"
                 }
                 with(getter.assertNotNull("Getter")) {
-                    type.name equals "Int"
+                    type.name equals "kotlin.Int"
                 }
                 visibility.values allEquals KotlinVisibility.Public
             }
@@ -126,14 +126,14 @@ class PropertyTest : AbstractModelTest("/src/main/kotlin/property/Test.kt", "pro
                     name equals "property"
                     children counts 0
                     with(getter.assertNotNull("Getter")) {
-                        type.name equals "Int"
+                        type.name equals "kotlin.Int"
                     }
                 }
                 with((this / "Bar" / "property").cast<DProperty>()) {
                     name equals "property"
                     children counts 0
                     with(getter.assertNotNull("Getter")) {
-                        type.name equals "Int"
+                        type.name equals "kotlin.Int"
                     }
                 }
             }

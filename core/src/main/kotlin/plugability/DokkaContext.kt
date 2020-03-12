@@ -60,7 +60,6 @@ enum class UnresolvedTypeHandler(val response: (KotlinType?) -> String? = { it?.
         else type.fqName?.asString()
     }),
     Approximate({ type ->
-        //        type?.fqName?.asString() // todo
         if (type?.isError != false) when (val t = type) {
             is org.jetbrains.kotlin.types.UnresolvedType -> t.presentableName
             is org.jetbrains.kotlin.types.DeferredType -> "Error type"
